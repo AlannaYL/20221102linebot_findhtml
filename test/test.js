@@ -1,18 +1,29 @@
-// 先寫個簡單的js去測試確定爬蟲可以爬到資料
 import axios from 'axios'
 import * as cheerio from 'cheerio'
 
-const main = async () => {
+const main = async (event) => {
   try {
-    const { data } = await axios.get('https://wdaweb.github.io/')
+    console.log('main' + event)
+    const { data } = await axios.get('https://artemperor.tw/tidbits')
     const $ = cheerio.load(data)
-    const courses = []
-    $('#general .card-title').each(function () {
-      console.log($(this).text().trim())
+    $('.list_box').each(function () {
+      // console.log($(this).find('h2').text())
+      if ($(this).find('h2').text().includes(event)) {
+        console.log($(this).find('p').text().substring(3, 26).trim())
+      }
     })
-    console.log(courses)
+
+    // const Exhibitions = []
+    // $('.list_box').each(function (event) {
+    // if (event === $(this).find('h2').text().trim()) {
+    // const bubble = JSON.parse(JSON.stringify(template))
+    // Exhibitions.push(bubble)
+    // console.log(event.message.text === $(this).includes($(this).find('h2').text().trim()))
+    // }
+    // console.log(Exhibitions)
   } catch (error) {
-    console.log(error)
+    console.log('error' + error)
   }
 }
-main()
+
+main('【在夾縫中行走】')

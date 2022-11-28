@@ -1,38 +1,37 @@
 import 'dotenv/config'
 import linebot from 'linebot'
-import { scheduleJob } from 'node-schedule'
-// 呼叫fetchCourse
-import fetchCourse from './commands/fetchCourse.js'
-import fetchAnime from './commands/fetchAnimate copy.js'
-import rateUpdate from './utils/rateUpdate.js'
+import express from 'express'
+import simple from './commands/simple.js'
+import fetchExhibitions from './commands/fetchExhibitions.js'
+
+const app = express()
 
 const bot = linebot({
-  channelId: process.env.CHANNEL_ID,
+  channelid: process.env.CHANNEL_ID,
   channelSecret: process.env.CHANNEL_SECRET,
   channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN
-
 })
 
-let USDTWD = 30
-const updateRate = async () => {
-  USDTWD = await rateUpdate()
-}
-scheduleJob('0 0 * * *', updateRate)
-updateRate()
-
 bot.on('message', event => {
+  console.log(event.message)
   if (event.message.type !== 'text') return
-
-  if (event.message.text === '共通課程') {
-    // 把事件丟進function
-    fetchCourse(event)
-  } else if (event.message.text.startsWith('查動畫 ')) {
-    fetchAnime(event)
-  } else if (event.message.text.startsWith('查匯率')) {
-    event.reply(USDTWD.toString())
+  else if (event.message.text === '查詢展覽') {
+    fetchExhibitions(event)
+  } else if (event.message.text === '我該如何使用？') {
+    event.reply('如果想找尋最新展覽，請點選展覽查詢')
+  } else {
+    simple(event)
   }
 })
 
-bot.listen('/', process.env.PORT || 3000, () => {
+const linebotParser = bot.parser()
+
+app.post('/', linebotParser)
+
+app.get('/', (req, res) => {
+  res.status(200).send('ok')
+})
+
+app.listen('/', process.env.PORT || 3000, () => {
   console.log('機器人啟動')
 })
